@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Scheduler</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'tasks/styles.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Task Scheduler</h1>
+        <form method="POST" action="{% url 'add_task' %}">
+            {% csrf_token %}
+            <input type="text" name="title" placeholder="Task Title" required>
+            <textarea name="description" placeholder="Task Description"></textarea>
+            <button type="submit">Add Task</button>
+        </form>
+        <ul>
+            {% for task in tasks %}
+            <li>
+                <span class="task-title">{{ task.title }}</span>
+                <p>{{ task.description }}</p>
+                <a href="{% url 'update_task' task.id %}" 
+                   onclick="event.preventDefault(); document.getElementById('toggle-task-form-{{ task.id }}').submit();">
+                   <span class="status-icon">
+                       {% if task.completed %}
+                           &#x2714; <!-- Check mark -->
+                       {% else %}
+                           &#x25CB; <!-- Empty circle -->
+                       {% endif %}
+                   </span>
+                   {% if task.completed %}Completed{% else %}Mark Complete{% endif %}
+                </a>
+                <a href="{% url 'update_task' task.id %}">Edit</a>
+                <a href="{% url 'delete_task' task.id %}">Delete</a>
+                <form id="toggle-task-form-{{ task.id }}" 
+                      method="POST" action="{% url 'update_task' task.id %}" style="display: none;">
+                    {% csrf_token %}
+                    <input type="hidden" name="completed" value="{% if not task.completed %}completed{% endif %}">
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>
